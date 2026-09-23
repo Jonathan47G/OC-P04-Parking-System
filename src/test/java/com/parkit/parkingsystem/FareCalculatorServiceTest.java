@@ -180,6 +180,47 @@ public class FareCalculatorServiceTest {
         assertEquals(0.5 * Fare.CAR_RATE_PER_HOUR, ticket.getPrice(), 0.001);
     }
 
+    @Test
+    public void calculateFareCarWithDiscount() {
+
+        Date outTime = new Date();
+        Date inTime = new Date(outTime.getTime() - (60 * 60 * 1000L));
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        fareCalculatorService.calculateFare(ticket, true);
+
+        assertEquals(
+                Fare.CAR_RATE_PER_HOUR * 0.95,
+                ticket.getPrice(),
+                0.001
+        );
+    }
+
+    @Test
+    public void calculateFareBikeWithDiscount() {
+
+        Date outTime = new Date();
+        Date inTime = new Date(outTime.getTime() - (60 * 60 * 1000L));
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        fareCalculatorService.calculateFare(ticket, true);
+
+        assertEquals(
+                Fare.BIKE_RATE_PER_HOUR * 0.95,
+                ticket.getPrice(),
+                0.001
+        );
+    }
 
 
 }
