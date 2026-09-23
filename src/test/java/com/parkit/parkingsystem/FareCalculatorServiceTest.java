@@ -124,4 +124,62 @@ public class FareCalculatorServiceTest {
         assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
     }
 
+    @Test
+    public void calculateFareCarWithLessThan30minutesParkingTime() {
+
+        // ARRANGE : préparer un stationnement de 20 minutes
+        Date outTime = new Date();
+        Date inTime = new Date(outTime.getTime() - (20 * 60 * 1000L));
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        // ACT : calculer le tarif
+        fareCalculatorService.calculateFare(ticket);
+
+        // ASSERT : vérifier que le stationnement est gratuit
+        assertEquals(0.0, ticket.getPrice(), 0.001);
+    }
+
+    @Test
+    public void calculateFareBikeWithLessThan30minutesParkingTime() {
+
+        // ARRANGE : préparer un stationnement de 20 minutes
+        Date outTime = new Date();
+        Date inTime = new Date(outTime.getTime() - (20 * 60 * 1000L));
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        // ACT : calculer le tarif
+        fareCalculatorService.calculateFare(ticket);
+
+        // ASSERT : vérifier que le stationnement est gratuit
+        assertEquals(0.0, ticket.getPrice(), 0.001);
+    }
+    @Test
+    public void calculateFareCarWithExactly30MinutesParkingTime() {
+
+        Date outTime = new Date();
+        Date inTime = new Date(outTime.getTime() - (30 * 60 * 1000L));
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        fareCalculatorService.calculateFare(ticket);
+
+        assertEquals(0.5 * Fare.CAR_RATE_PER_HOUR, ticket.getPrice(), 0.001);
+    }
+
+
+
 }
