@@ -94,10 +94,31 @@ public class ParkingDataBaseIT {
         ParkingService parkingService =
                 new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
+        // Simule une entrée 1 minute plus tôt
+        // pour éviter un conflit de précision temporelle avec MySQL.
+        try (
+                Connection connection = dataBaseTestConfig.getConnection();
+                PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE ticket " +
+                                "SET IN_TIME = ? " +
+                                "WHERE VEHICLE_REG_NUMBER = ? " +
+                                "AND OUT_TIME IS NULL"
+                )
+        ) {
+            statement.setTimestamp(
+                    1,
+                    new Timestamp(
+                            System.currentTimeMillis() - (60 * 1000L)
+                    )
+            );
+
+            statement.setString(2, "ABCDEF");
+
+            assertEquals(1, statement.executeUpdate());
+        }
+
         parkingService.processExitingVehicle();
 
-        // Vérifie que le prix et l'heure de sortie
-        // ont bien été enregistrés dans la base
         try (
                 Connection connection = dataBaseTestConfig.getConnection();
                 PreparedStatement statement = connection.prepareStatement(
@@ -113,8 +134,7 @@ public class ParkingDataBaseIT {
 
             assertTrue(resultSet.next());
 
-            // Entrée puis sortie immédiate :
-            // moins de 30 minutes => stationnement gratuit
+            // 1 minute < 30 minutes => gratuit
             assertEquals(
                     0.0,
                     resultSet.getDouble("PRICE"),
